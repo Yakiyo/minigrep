@@ -1,4 +1,5 @@
-use std::{env, fs, process};
+use std::{env, process};
+use minigrep::{Config, run};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -10,28 +11,10 @@ fn main() {
 		}
 	};
 
-    dbg!(&config, &config.query);
-    let file = match fs::read_to_string(&config.path) {
-        Ok(some) => Some(some),
-        Err(e) => panic!("Error when opening file. {}", e),
-    };
-    println!("{:#?}", file);
-}
-
-#[derive(Debug)]
-struct Config {
-    query: String,
-    path: String,
-}
-
-impl Config {
-    fn build(args: &[String]) -> Result<Self, &'static str> {
-        if args.len() < 3 {
-            return Err("Too few arguments") //&format!("Expected two arguments. Got {}", args.len() -1 ));
-        }
-        return Ok(Self {
-            query: args[1].clone(),
-            path: args[2].clone(),
-        });
-    }
+    println!("Searching for {}", config.query);
+    println!("In file {}", config.path);
+    if let Err(e) = run(config) {
+		println!("Internal error, {e}");
+		process::exit(1);
+	};
 }
