@@ -21,19 +21,21 @@ impl Config {
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let contents = fs::read_to_string(config.path)?;
 
-    println!("With text:\n{contents}");
+    for line in search(&config.query, &contents) {
+        print!("{line}\n");
+    }
 
     Ok(())
 }
 
 pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
     let mut res: Vec<&str> = Vec::new();
-	for line in contents.lines() {
-		if line.contains(query) {
-			res.push(line);
-		}
-	}
-	return res
+    for line in contents.lines() {
+        if line.contains(query) {
+            res.push(line);
+        }
+    }
+    return res;
 }
 
 #[cfg(test)]
