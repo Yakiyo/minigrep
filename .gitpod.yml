@@ -4,6 +4,6 @@
 
 tasks:
   - init: cargo build
-    command: cargo watch -x run
+    command: cargo run -- frog file.txt
 
 
