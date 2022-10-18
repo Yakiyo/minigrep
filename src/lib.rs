@@ -14,7 +14,9 @@ impl Config {
         }
         let mut case = false;
         if args.len() > 3 {
-            if args[3].to_lowercase() == "true" { case = true; }
+            if args[3].to_lowercase() == "true" {
+                case = true;
+            }
         } else if let Ok(t) = env::var("IGNORE_CASE") {
             if t.to_lowercase() == "true" {
                 case = true;
@@ -30,10 +32,13 @@ impl Config {
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let contents = fs::read_to_string(&config.path)?;
-	let val = search(&config.query, &contents, &config.case_sensitive);
-	if val.is_empty() {
-		println!("No results matching query: {} found in file {}", &config.query, &config.path);
-	}
+    let val = search(&config.query, &contents, &config.case_sensitive);
+    if val.is_empty() {
+        println!(
+            "No results matching query: {} found in file {}",
+            &config.query, &config.path
+        );
+    }
     for line in search(&config.query, &contents, &config.case_sensitive) {
         println!("{line}");
     }
@@ -52,7 +57,7 @@ pub fn search<'a>(query: &str, contents: &'a str, case: &bool) -> Vec<&'a str> {
         }
     } else {
         let query = query.to_lowercase();
-		for line in contents.lines() {
+        for line in contents.lines() {
             if line.to_lowercase().contains(&query) {
                 res.push(line);
             }
@@ -78,8 +83,8 @@ Pick three.";
             search(query, contents, &case)
         );
     }
-	#[test]
-	fn search_test_insensitive() {
+    #[test]
+    fn search_test_insensitive() {
         let query = "DuCt";
         let case = true;
         let contents = "\
