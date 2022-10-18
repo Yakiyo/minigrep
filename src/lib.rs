@@ -1,19 +1,30 @@
-use std::{error::Error, fs};
+use std::{error::Error, fs, env};
 
 #[derive(Debug)]
 pub struct Config {
     pub query: String,
     pub path: String,
+    pub case_sensitive: bool,
 }
 
 impl Config {
     pub fn build(args: &[String]) -> Result<Self, &'static str> {
         if args.len() < 3 {
-            return Err("Too few arguments"); //&format!("Expected two arguments. Got {}", args.len() -1 ));
+            return Err("Too few arguments");
         }
+		let mut case = false;
+		if args.len() > 3 && args[3].to_lowercase() == "true" {
+			case = true;
+		} else if let Ok(t) = env::var("IGNORE_CASE") {
+			if t.to_lowercase() == "true" {
+				case = true;
+			}
+		}
+		println!("{}", case);
         return Ok(Self {
             query: args[1].clone(),
             path: args[2].clone(),
+			case_sensitive: case,
         });
     }
 }
@@ -45,9 +56,9 @@ mod test {
     fn search_test() {
         let query = "duct";
         let contents = "\
-Rust:
-safe, fast, productive.
-Pick three.";
+			Rust:\
+			safe, fast, productive.\
+			Pick three.";
 
         assert_eq!(vec!["safe, fast, productive."], search(query, contents));
     }
