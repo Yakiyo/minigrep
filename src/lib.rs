@@ -8,25 +8,39 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn build(args: &[String]) -> Result<Self, &'static str> {
-        if args.len() < 3 {
-            return Err("Too few arguments");
-        }
+    pub fn build(mut args: impl Iterator<Item = String>) -> Result<Self, &'static str> {
+        // Consume the first item since it only returns the directory path
+        args.next();
         let mut case = false;
-        if args.len() > 3 {
-            if args[3].to_lowercase() == "true" {
-                case = true;
-            }
-        } else if let Ok(t) = env::var("IGNORE_CASE") {
+        if let Ok(t) = env::var("IGNORE_CASE") {
             if t.to_lowercase() == "true" {
                 case = true;
             }
         }
-        return Ok(Self {
-            query: args[1].clone(),
-            path: args[2].clone(),
+
+        let query = match args.next() {
+            Some(arg) => arg,
+            None => return Err("Didn't get a query string"),
+        };
+        let path = match args.next() {
+            Some(arg) => arg,
+            None => return Err("Didn't get a file path"),
+        };
+
+        // override case with args value **if** it exists, else use env or default
+        if let Some(t) = args.next() {
+            if t.to_lowercase() == "true" {
+                case = true;
+            } else {
+                case = false;
+            }
+        };
+
+        Ok(Config {
+            query,
+            path,
             case_sensitive: case,
-        });
+        })
     }
 }
 
@@ -35,7 +49,7 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let val = search(&config.query, &contents, &config.case_sensitive);
     if val.is_empty() {
         println!(
-            "No results matching query: {} found in file {}",
+            "No results matching query: \"{}\" found in file \"{}\"",
             &config.query, &config.path
         );
     }
