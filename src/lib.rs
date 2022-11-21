@@ -53,7 +53,7 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
             &config.query, &config.path
         );
     }
-    for line in search(&config.query, &contents, &config.case_sensitive) {
+    for line in val {
         println!("{line}");
     }
 
